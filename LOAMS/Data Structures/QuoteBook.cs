@@ -7,7 +7,7 @@ using MktSrvcAPI;
 
 namespace LOAMS
 {
-    public class QuoteBook
+    public class QuoteBook : IBufferItem<QuoteBook>
     {
         public InstrInfo[] Instr { get; set; }
         public uint TS { get; set; }
@@ -21,6 +21,9 @@ namespace LOAMS
         public byte NumAsk { get; set; }
         public byte[] AskExch { get; set; }
         public QuoteInfo[] AskBk { get; set; }
+
+        public long TEST_TIMESTAMP_TICKS = 0;
+        public string InstrumentName = "";
 
         public void GetTOB(ref float bidprc, ref uint bidsz, ref float askprc, ref uint asksz)
         {
@@ -47,6 +50,21 @@ namespace LOAMS
             }
 
             askprc = (NumAsk > 0 ? AskBk[0].prc : 0.0f);
+        }
+
+        public void Update(QuoteBook newQuote)
+        {
+            Instr = newQuote.Instr;
+            BidBk = newQuote.BidBk;
+            AskBk = newQuote.AskBk;
+            AskExch = newQuote.AskExch;
+            BidExch = newQuote.BidExch;
+            NumAsk = newQuote.NumAsk;
+            NumBid = newQuote.NumBid;
+            TS = newQuote.TS;
+            PartID = newQuote.PartID;
+            Mod = newQuote.Mod;
+            TEST_TIMESTAMP_TICKS = newQuote.TEST_TIMESTAMP_TICKS;
         }
     }
 }

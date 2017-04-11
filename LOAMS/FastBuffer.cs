@@ -13,7 +13,7 @@ namespace LOAMS
     public delegate void BufferEventHandlerFunction<T>(T data);
     
 
-    public class FastBuffer<T> where T : class, new()
+    public class FastBuffer<T> where T: class, IBufferItem<T>, new()
     {
         RingBuffer<T> _ringBuffer;
         Disruptor<T> _disruptor;
@@ -23,13 +23,14 @@ namespace LOAMS
 
         List<BufferEventHandler<T>> _eventHandlers = new List<BufferEventHandler<T>>();
 
-        
+        EventPublisher<T> _publisher;
 
         public FastBuffer(int bufferSize = 1024)
         {
             _bufferSize = bufferSize;
             
             _disruptor = new Disruptor<T>(() => { return new T(); }, _bufferSize, TaskScheduler.Default, ProducerType.Single, new SleepingWaitStrategy());
+            
         }
 
         public void ConsumerSubscribe(IMarketDataConsumer<T> cons)
@@ -49,7 +50,12 @@ namespace LOAMS
 
         public void Add(T data)
         {
-            _ringBuffer.PublishEvent(new EventTranslator<T>(data));
+
+            long sequenceNum = _ringBuffer.Next();
+            T temp = _ringBuffer[sequenceNum];
+            temp.Update(data);
+            _ringBuffer.Publish(sequenceNum);
+            
         }
 
 
@@ -57,10 +63,17 @@ namespace LOAMS
         {
             _disruptor.HandleEventsWith(_eventHandlers.ToArray<IEventHandler<T>>());
             _ringBuffer = _disruptor.Start();
+
+            _publisher = new EventPublisher<T>(_ringBuffer);
+
             _disruptorHasStarted = true;
             
         }
 
+        void publishEvent(T arg, long sequence, T arg2)
+        {
+
+        }
 
 
         class BufferEventHandler<A> : IEventHandler<A>
@@ -104,6 +117,9 @@ namespace LOAMS
     }
 
     
-
+    public interface IBufferItem<T>
+    {
+        void Update(T newItem);
+    }
 
 }

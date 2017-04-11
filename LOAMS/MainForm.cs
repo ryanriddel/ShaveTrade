@@ -11,7 +11,7 @@ using Disruptor;
 using MktSrvcAPI;
 using DevExpress.XtraBars.Ribbon;
 using DevExpress.XtraBars;
-
+using System.Threading;
 namespace LOAMS
 {
     public partial class MainForm : DevExpress.XtraEditors.XtraForm
@@ -39,6 +39,24 @@ namespace LOAMS
             {
                 Console.WriteLine("Click");
             }
+        }
+
+
+        
+        private void tileItem1_ItemClick(object sender, DevExpress.XtraEditors.TileItemEventArgs e)
+        {
+            Hub.Initialize();
+
+            Hub.runTest();
+
+            
+            
+        }
+
+        private void tileItem2_ItemClick(object sender, DevExpress.XtraEditors.TileItemEventArgs e)
+        {
+           
+
         }
     }
 }

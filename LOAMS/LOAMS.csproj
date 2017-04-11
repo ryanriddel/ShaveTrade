@@ -14,7 +14,7 @@
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
+    <PlatformTarget>x64</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
@@ -40,19 +40,18 @@
     <Reference Include="DevExpress.Sparkline.v15.2.Core" />
     <Reference Include="DevExpress.XtraBars.v15.2, Version=15.2.9.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
     <Reference Include="DevExpress.XtraEditors.v15.2" />
+    <Reference Include="DevExpress.XtraGrid.v15.2, Version=15.2.9.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
     <Reference Include="DevExpress.XtraLayout.v15.2, Version=15.2.9.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
     <Reference Include="Disruptor, Version=3.3.5.1, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\Disruptor.3.3.5.1\lib\net45\Disruptor.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="MktSrvcAPI">
-      <HintPath>..\dll\MktSrvcAPI.dll</HintPath>
+    <Reference Include="MktSrvcAPI, Version=1.0.0.0, Culture=neutral, processorArchitecture=AMD64">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>dll\MktSrvcAPI.dll</HintPath>
     </Reference>
-    <Reference Include="RBClients">
-      <HintPath>..\dll\RBClients.dll</HintPath>
-    </Reference>
-    <Reference Include="RBtech.Commons">
-      <HintPath>..\dll\RBtech.Commons.dll</HintPath>
+    <Reference Include="RBTech.RBcommon">
+      <HintPath>dll\RBTech.RBcommon.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -66,16 +65,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ClassFactory.cs" />
     <Compile Include="FastBuffer.cs" />
     <Compile Include="Hub.cs" />
+    <Compile Include="Logger.cs" />
     <Compile Include="MarketDataFeed.cs" />
-    <Compile Include="Level2Window.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="Level2Window.Designer.cs">
-      <DependentUpon>Level2Window.cs</DependentUpon>
-    </Compile>
     <Compile Include="MainForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -114,6 +107,7 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="Controls\" />
     <Folder Include="Images\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

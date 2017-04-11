@@ -7,7 +7,7 @@ using MktSrvcAPI;
 
 namespace LOAMS
 {
-    public interface IMarketDataConsumer<T> //T => QuoteBook or TradeInfo
+    public interface IMarketDataConsumer<T>
     {
         void NewDataHandler(T _event);
     }
@@ -16,9 +16,5 @@ namespace LOAMS
     {
         void AddQuoteConsumer(InstrInfo instrument, IMarketDataConsumer<QuoteBook> consumer);
         void AddTradeConsumer(InstrInfo instrument, IMarketDataConsumer<TradeInfo> consumer);
-    }
-    public interface IQuoteSubscriber
-    {
-
-    }
+    } 
 }

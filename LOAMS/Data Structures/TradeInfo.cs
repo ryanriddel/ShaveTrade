@@ -7,7 +7,7 @@ using MktSrvcAPI;
 
 namespace LOAMS
 {
-    public class TradeInfo
+    public class TradeInfo : IBufferItem<TradeInfo>
     {
         public InstrInfo[] Instr { get; set; }
         public uint TS { get; set; }
@@ -26,5 +26,31 @@ namespace LOAMS
         public float Low { get; set; }
         public float Open { get; set; }
         public uint TotVol { get; set; }
+
+        public long TEST_TIMESTAMP_TICKS = 0;
+        public string InstrumentName = "";
+
+        public void Update(TradeInfo newInfo)
+        {
+            this.Instr = newInfo.Instr;
+            this.TS = newInfo.TS;
+            this.PartID = newInfo.PartID;
+            this.Prc = newInfo.Prc;
+            this.Sz = newInfo.Sz;
+            this.CondNum = newInfo.CondNum;
+            this.Cond = newInfo.Cond;
+            this.NBBOBidPrc = newInfo.NBBOBidPrc;
+            this.NBBOAskPrc = newInfo.NBBOAskPrc;
+            this.NBBOBidSz = newInfo.NBBOBidSz;
+            this.NBBOAskSz = newInfo.NBBOAskSz;
+            this.BidExch = newInfo.BidExch;
+            this.AskExch = newInfo.AskExch;
+            this.High = newInfo.High;
+            this.Low = newInfo.Low;
+            this.Open = newInfo.Open;
+            this.TotVol = newInfo.TotVol;
+            this.TEST_TIMESTAMP_TICKS = newInfo.TEST_TIMESTAMP_TICKS;
+            this.InstrumentName = newInfo.InstrumentName;
+        }
     }
 }

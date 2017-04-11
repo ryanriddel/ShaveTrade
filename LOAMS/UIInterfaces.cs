@@ -57,7 +57,7 @@ namespace LOAMS
         Window _parent;
 
         Guid _windowUserControlID = Guid.NewGuid();
-
+        
         WindowUserControl(Window parent)
         {
             _parent = parent;

@@ -53,7 +53,7 @@
             this.tileControl1.DragSize = new System.Drawing.Size(0, 0);
             this.tileControl1.Groups.Add(this.tileGroup2);
             this.tileControl1.ItemTextShowMode = DevExpress.XtraEditors.TileItemContentShowMode.Always;
-            this.tileControl1.Location = new System.Drawing.Point(3, 1);
+            this.tileControl1.Location = new System.Drawing.Point(1, 1);
             this.tileControl1.LookAndFeel.SkinName = "Visual Studio 2013 Blue";
             this.tileControl1.MaxId = 4;
             this.tileControl1.Name = "tileControl1";
@@ -72,33 +72,43 @@
             // tileItem1
             // 
             this.tileItem1.AllowGlyphSkinning = DevExpress.Utils.DefaultBoolean.True;
+            this.tileItem1.AppearanceItem.Normal.BackColor = System.Drawing.Color.LimeGreen;
+            this.tileItem1.AppearanceItem.Normal.Options.UseBackColor = true;
             this.tileItem1.ContentAnimation = DevExpress.XtraEditors.TileItemContentAnimationType.Fade;
-            tileItemElement1.Text = "Level2";
+            tileItemElement1.Text = "Level2 Stream Test";
             tileItemElement1.TextAlignment = DevExpress.XtraEditors.TileItemContentAlignment.MiddleCenter;
             this.tileItem1.Elements.Add(tileItemElement1);
             this.tileItem1.Id = 1;
             this.tileItem1.ItemSize = DevExpress.XtraEditors.TileItemSize.Medium;
             this.tileItem1.Name = "tileItem1";
             this.tileItem1.TextShowMode = DevExpress.XtraEditors.TileItemContentShowMode.Always;
+            this.tileItem1.ItemClick += new DevExpress.XtraEditors.TileItemClickEventHandler(this.tileItem1_ItemClick);
             // 
             // tileItem2
             // 
             this.tileItem2.AllowGlyphSkinning = DevExpress.Utils.DefaultBoolean.True;
+            this.tileItem2.AppearanceItem.Normal.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(192)))), ((int)(((byte)(0)))));
+            this.tileItem2.AppearanceItem.Normal.Font = new System.Drawing.Font("Tahoma", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.tileItem2.AppearanceItem.Normal.Options.UseBackColor = true;
+            this.tileItem2.AppearanceItem.Normal.Options.UseFont = true;
             this.tileItem2.ContentAnimation = DevExpress.XtraEditors.TileItemContentAnimationType.Fade;
-            tileItemElement2.Text = "Spreads";
+            tileItemElement2.Text = "Level2 Speed Test";
             tileItemElement2.TextAlignment = DevExpress.XtraEditors.TileItemContentAlignment.MiddleCenter;
             this.tileItem2.Elements.Add(tileItemElement2);
             this.tileItem2.Id = 2;
             this.tileItem2.ItemSize = DevExpress.XtraEditors.TileItemSize.Medium;
             this.tileItem2.Name = "tileItem2";
+            this.tileItem2.ItemClick += new DevExpress.XtraEditors.TileItemClickEventHandler(this.tileItem2_ItemClick);
             // 
             // tileItem3
             // 
             this.tileItem3.AllowGlyphSkinning = DevExpress.Utils.DefaultBoolean.True;
-            this.tileItem3.AppearanceItem.Normal.Font = new System.Drawing.Font("Tahoma", 15.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.tileItem3.AppearanceItem.Normal.BackColor = System.Drawing.Color.Green;
+            this.tileItem3.AppearanceItem.Normal.Font = new System.Drawing.Font("Tahoma", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.tileItem3.AppearanceItem.Normal.Options.UseBackColor = true;
             this.tileItem3.AppearanceItem.Normal.Options.UseFont = true;
             this.tileItem3.ContentAnimation = DevExpress.XtraEditors.TileItemContentAnimationType.Fade;
-            tileItemElement3.Text = "Orders";
+            tileItemElement3.Text = "Misc. Tests";
             tileItemElement3.TextAlignment = DevExpress.XtraEditors.TileItemContentAlignment.MiddleCenter;
             this.tileItem3.Elements.Add(tileItemElement3);
             this.tileItem3.Id = 3;

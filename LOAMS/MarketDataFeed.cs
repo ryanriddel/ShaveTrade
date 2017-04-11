@@ -22,91 +22,81 @@ using System.Timers;
 namespace LOAMS
 {
 
-    public class QuoteFeedBuffer : FastBuffer<QuoteBook>
-    {
-        InstrInfo _instrInfo;
-        
-        public QuoteFeedBuffer(InstrInfo instr, int bufferSize = 1024) : base(bufferSize)
-        {
-            _instrInfo = instr;
-        }
 
-        public void addQuote(QuoteBook quote)
-        {
-            this.Add(quote);
-        }
-    }
-
-    public class TradeFeedBuffer : FastBuffer<TradeInfo>
-    {
-        InstrInfo _instrInfo;
-
-        public TradeFeedBuffer(InstrInfo instr, int bufferSize = 1024) : base(bufferSize)
-        {
-            _instrInfo = instr;
-        }
-    }
-    
-    public class QuoteFeed 
-    {
-        public Dictionary<string, QuoteFeedBuffer> QuoteFeedBuffers = new Dictionary<string, QuoteFeedBuffer>();
-
-        public QuoteFeed()
-        {
-
-        }
-        public void AddQuoteBuffer(InstrInfo instrument, int bufferSize = 1024)
-        {
-            if (!QuoteFeedBuffers.ContainsKey(instrument.ToString()))
-            {
-                QuoteFeedBuffers[Utilities.InstrToStr(instrument)] = new QuoteFeedBuffer(instrument);
-            }
-            else
-                throw new Exception("Buffer already exists.");
-        }
-
-        public void AddQuote(InstrInfo instrument, QuoteBook quote)
-        {
-            if(QuoteFeedBuffers.ContainsKey(Utilities.InstrToStr(instrument)))
-                QuoteFeedBuffers[Utilities.InstrToStr(instrument)].Add(quote);
-        }
-    }
-    
     public class MarketDataFeed : IMarketDataProducer
     {
         QuoteFeed _quoteFeed = new QuoteFeed();
+        TradeFeed _tradeFeed = new TradeFeed();
         FeedHandler _feedHandler = new FeedHandler();
         private bool _isConnected = false;
-        
+        private bool _isEnabled = false;
+
+
         public MarketDataFeed()
         {
-            
+            ConnectToFeed();
         }
 
 
-        public void Initialize()
+        public void ConnectToFeed()
         {
-            _feedHandler.InitializeClients();
+            try
+            {
+                _feedHandler.InitializeClients();
+                _feedHandler.ConnectToData();
+                _isConnected = true;
+            }
+            catch(Exception ex)
+            {
+                throw new Exception("Failed to initialize market data feed connection.  " + ex.Message);
+            }
+        }
+        public void DisconnectFromFeed()
+        {
+            try
+            {
+                _feedHandler.DisconnectLevel2Data();
+                _isConnected = false;
+            }
+            catch(Exception ex)
+            {
+                throw new Exception("Failed to disconnect from market data feed connection.  " + ex.Message);
+            }
         }
 
-        public void Start()
+        public void Enable()
         {
-            _feedHandler.ConnectToData();
-            _isConnected = true;
+            if (_isConnected)
+            {
+                _quoteFeed.FinalizeAllBuffersEvents();
+                _isEnabled = true;
+            }
+            else
+                throw new Exception("Please connect to feed before enabling market data collection.");
+        }
+
+        public void AddQuote(QuoteBook quote)
+        {
+            _quoteFeed.AddQuote(quote.InstrumentName, quote);
+        }
+
+        public void AddTrade(TradeInfo trade)
+        {
+            _tradeFeed.AddTrade(trade.InstrumentName, trade);
         }
         
         public void AddQuoteConsumer(InstrInfo instrument, IMarketDataConsumer<QuoteBook> consumer)
         {
-            _quoteFeed.QuoteFeedBuffers[Utilities.InstrToStr(instrument)].ConsumerSubscribe(consumer);
+            _quoteFeed.AddQuoteConsumer(Utilities.InstrToStr(instrument), consumer);
         }
         public void AddTradeConsumer(InstrInfo instrument, IMarketDataConsumer<TradeInfo> consumer)
         {
-            throw new NotImplementedException("Not yet..");
+            _tradeFeed.AddTradeConsumer(Utilities.InstrToStr(instrument), consumer);
         }
 
         public void SubscribeToQuoteFeed(InstrInfo instrument)
         {
-            _quoteFeed.AddQuoteBuffer(instrument);
+            _quoteFeed.AddQuoteBuffer(Utilities.InstrToStr(instrument));
 
             if(_isConnected)
                 _feedHandler.subscribeToSymbolQuoteFeed(instrument, DepthOfBkHndlr);
@@ -114,10 +104,10 @@ namespace LOAMS
 
         public void SubscribeToTradeFeed(InstrInfo instrument)
         {
-            throw new NotImplementedException("Not yet..");
+            _tradeFeed.AddTradeBuffer(Utilities.InstrToStr(instrument));
 
-            //if(_isConnected)
-              //  _feedHandler.subscribeToSymbolTradeFeed(instrument, LastTrdHndlr);
+            if (_isConnected)
+                _feedHandler.subscribeToSymbolTradeFeed(instrument, LastTrdHndlr);
         }
 
 
@@ -138,8 +128,9 @@ namespace LOAMS
                 BidBk = bidbk,
                 AskBk = askbk
             };
-            
-            _quoteFeed.AddQuote(instr[0], quote);
+
+            if(_isEnabled )
+                _quoteFeed.AddQuote(instr[0], quote);
         }
 
         private void LastTrdHndlr(InstrInfo[] instr, uint ts, byte partid, float prc, uint sz, byte condnum, byte[] cond, float nbbobidprc, float nbboaskprc, uint nbbobidsz, uint nbboasksz, string bidexch, string askexch, float high, float low, float open, uint totvol)
@@ -159,6 +150,11 @@ namespace LOAMS
                 NBBOAskSz = nbboasksz,
                 CondNum = condnum
             };
+
+            if(_isEnabled)
+            {
+                _tradeFeed.AddTrade(instr[0], ti);
+            }
         }
     }
 
@@ -253,7 +249,7 @@ namespace LOAMS
         
        
         #region DATA_FEED_CONNECTION_TERMINATORS
-        private void DisconnectLevel2Data()
+        public void DisconnectLevel2Data()
         {
             //optDobkClient.Disconnect();
             if (eqLastTrdClient.IsConnected())
@@ -432,5 +428,163 @@ namespace LOAMS
         #endregion
 
         #endregion
+    }
+
+
+    public class QuoteFeedBuffer : FastBuffer<QuoteBook>
+    {
+        string _instrumentName;
+
+        public QuoteFeedBuffer(string instrumentName, int bufferSize = 1024) : base(bufferSize)
+        {
+            _instrumentName = instrumentName;
+        }
+
+        public void AddQuote(QuoteBook quote)
+        {
+            this.Add(quote);
+        }
+
+    }
+
+    public class TradeFeedBuffer : FastBuffer<TradeInfo>
+    {
+        string _instrumentName;
+
+        public TradeFeedBuffer(string instrument, int bufferSize = 1024) : base(bufferSize)
+        {
+            _instrumentName = instrument;
+        }
+
+        public void AddTrade(TradeInfo trade)
+        {
+            this.Add(trade);
+        }
+    }
+
+    public class QuoteFeed
+    {
+        public Dictionary<string, QuoteFeedBuffer> _quoteFeedBuffers = new Dictionary<string, QuoteFeedBuffer>();
+
+        public QuoteFeed()
+        {
+
+        }
+        public bool AddQuoteBuffer(string instrumentName, int bufferSize = 1024)
+        {
+            if (!_quoteFeedBuffers.ContainsKey(instrumentName))
+            {
+                _quoteFeedBuffers[instrumentName] = new QuoteFeedBuffer(instrumentName);
+                return true;
+            }
+            else
+                return false;
+        }
+
+        public bool AddQuoteConsumer(string instrumentName, IMarketDataConsumer<QuoteBook> consumer)
+        {
+            if (!_quoteFeedBuffers.ContainsKey(instrumentName))
+            {
+                _quoteFeedBuffers[instrumentName].ConsumerSubscribe(consumer);
+                return true;
+            }
+            else
+                return false;
+        }
+
+        public void AddQuote(string instrumentName, QuoteBook quote)
+        {
+            if (_quoteFeedBuffers.ContainsKey(instrumentName))
+                _quoteFeedBuffers[instrumentName].Add(quote);
+            else
+                throw new Exception("Buffer does not exist.");
+        }
+
+        public void AddQuote(InstrInfo instrument, QuoteBook quote)
+        {
+            if (_quoteFeedBuffers.ContainsKey(Utilities.InstrToStr(instrument)))
+                _quoteFeedBuffers[Utilities.InstrToStr(instrument)].Add(quote);
+            else
+                throw new Exception("Buffer does not exist.");
+        }
+
+        public void FinalizeBufferEvents(string instrumentName)
+        {
+            if (_quoteFeedBuffers.ContainsKey(instrumentName))
+                _quoteFeedBuffers[instrumentName].Begin();
+            else
+                throw new Exception("Buffer does not exist.");
+        }
+
+        public void FinalizeAllBuffersEvents()
+        {
+            foreach (KeyValuePair<string, QuoteFeedBuffer> item in _quoteFeedBuffers)
+            {
+                item.Value.Begin();
+            }
+        }
+    }
+
+    public class TradeFeed
+    {
+        Dictionary<string, TradeFeedBuffer> _tradeFeedBuffers = new Dictionary<string, TradeFeedBuffer>();
+
+        public TradeFeed()
+        {
+
+        }
+        public bool AddTradeBuffer(string instrumentName, int bufferSize = 1024)
+        {
+            if (!_tradeFeedBuffers.ContainsKey(instrumentName))
+            {
+                _tradeFeedBuffers[instrumentName] = new TradeFeedBuffer(instrumentName);
+                return true;
+            }
+            else
+                return false;
+        }
+
+        public bool AddTradeConsumer(string instrumentName, IMarketDataConsumer<TradeInfo> consumer)
+        {
+            if (_tradeFeedBuffers.ContainsKey(instrumentName))
+            {
+                _tradeFeedBuffers[instrumentName].ConsumerSubscribe(consumer);
+                return true;
+            }
+            else
+                return false;
+        }
+
+        public void AddTrade(string instrumentName, TradeInfo trade)
+        {
+            if (_tradeFeedBuffers.ContainsKey(instrumentName))
+                _tradeFeedBuffers[instrumentName].Add(trade);
+            else
+                throw new Exception("Buffer does not exist.");
+        }
+
+        public void AddTrade(InstrInfo instrument, TradeInfo trade)
+        {
+            if (_tradeFeedBuffers.ContainsKey(Utilities.InstrToStr(instrument)))
+                _tradeFeedBuffers[Utilities.InstrToStr(instrument)].Add(trade);
+            else
+                throw new Exception("Buffer does not exist.");
+        }
+
+        public void FinalizeBufferEvents(string instrumentName)
+        {
+            if (_tradeFeedBuffers.ContainsKey(instrumentName))
+                _tradeFeedBuffers[instrumentName].Begin();
+            else
+                throw new Exception("Buffer does not exist.");
+        }
+
+        public void FinalizeAllBuffersEvents()
+        {
+            foreach (KeyValuePair<string, TradeFeedBuffer> item in _tradeFeedBuffers)
+            {
+                item.Value.Begin();
+            }
+        }
     }
 }
